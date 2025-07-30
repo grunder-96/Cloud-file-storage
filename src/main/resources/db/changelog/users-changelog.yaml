@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: cloud-storage-admin
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            tableExists:
+              tableName: users
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 2
+      author: cloud-storage-admin
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            indexExists:
+              tableName: users
+              columnNames: username
+              indexName: idx_users_username_lower
+      changes:
+        - sql:
+            sql: >
+              CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username_lower 
+              ON users (LOWER(username))

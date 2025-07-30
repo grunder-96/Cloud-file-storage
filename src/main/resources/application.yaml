@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: cloud-file-storage
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cloud
+    username: admin
+    password: Qwe@123!
+
+#server:
+#  servlet:
+#    session:
+#      persistent: false
