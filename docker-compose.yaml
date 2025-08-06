@@ -1,5 +1,6 @@
 volumes:
   postgres_data:
+  redis_data:
 
 services:
   database:
@@ -17,3 +18,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  redis:
+    image: redis:8.0.3
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --requirepass 'redis_pass@!'
