@@ -86,7 +86,6 @@ public class SecurityConfig {
                                 "/api/auth/sign-up",
                                 "/api/auth/sign-in"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/sign-out").authenticated()
                         .anyRequest().authenticated()
                 )
 
