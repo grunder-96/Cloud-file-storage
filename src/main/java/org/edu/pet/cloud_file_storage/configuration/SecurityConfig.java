@@ -3,7 +3,6 @@ package org.edu.pet.cloud_file_storage.configuration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,8 +14,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -29,6 +33,15 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
+    public SessionAuthenticationStrategy sessionAuthenticationStrategy() {
+
+        SessionFixationProtectionStrategy sessionFixationProtectionStrategy = new SessionFixationProtectionStrategy();
+        sessionFixationProtectionStrategy.setMigrateSessionAttributes(true);
+
+        return new CompositeSessionAuthenticationStrategy(List.of(sessionFixationProtectionStrategy));
     }
 
     @Bean
@@ -55,9 +68,15 @@ public class SecurityConfig {
                         customizer.authenticationEntryPoint(customAuthEntryPoint)
                 )
 
+                .sessionManagement(customizer -> customizer
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionFixation().migrateSession()
+                        .sessionAuthenticationStrategy(sessionAuthenticationStrategy())
+                )
+
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
-                                    "/",
+                                "/",
                                 "/index.html",
                                 "/config.js",
                                 "/assets/**",
@@ -69,11 +88,6 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/sign-out").authenticated()
                         .anyRequest().authenticated()
-                )
-
-                .sessionManagement(customizer -> customizer
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .sessionFixation().migrateSession()
                 )
 
                 .logout(customizer -> customizer
