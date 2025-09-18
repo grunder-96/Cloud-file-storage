@@ -19,6 +19,7 @@ public class LoginService {
 
     private final AuthenticationManager authManager;
     private final SecurityContextService securityContextService;
+    private final SessionSecurityService sessionSecurityService;
 
     public AuthResponseDto login(SignInRequestDto signInRequestDto, HttpServletRequest req, HttpServletResponse resp) {
 
@@ -27,6 +28,7 @@ public class LoginService {
 
         Authentication authResponse = authManager.authenticate(authToken);
 
+        sessionSecurityService.applySessionRelatedFunctionality(authResponse, req, resp);
         securityContextService.injectSecurityContext(authResponse, req, resp);
 
         return modelMapper.map(signInRequestDto, AuthResponseDto.class);
