@@ -17,7 +17,7 @@ public class SecurityContextService {
 
     public void injectSecurityContext(Authentication authResponse, HttpServletRequest req, HttpServletResponse resp) {
 
-        SecurityContext context = SecurityContextHolder.getContext();
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authResponse);
         SecurityContextHolder.setContext(context);
         securityContextRepository.saveContext(context, req, resp);
