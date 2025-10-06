@@ -1,15 +1,18 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   application:
     name: cloud-file-storage
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/cloud
-    username: admin
-    password: Qwe@123!
+    url: jdbc:postgresql://localhost:${DB_PORT:5432}/${DB_NAME:cloud}
+    username: ${DB_USERNAME:admin}
+    password: ${DB_PASSWORD:"Qwerty-12345"}
 
   data:
     redis:
-      password: redis_pass@!
+      password: ${REDIS_PASSWORD:redis_simple_pass}
 
   session:
     timeout: 7d
