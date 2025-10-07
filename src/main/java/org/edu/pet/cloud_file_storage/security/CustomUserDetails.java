@@ -1,6 +1,7 @@
 package org.edu.pet.cloud_file_storage.security;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,6 +10,7 @@ import org.springframework.util.Assert;
 
 import java.util.Collection;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomUserDetails extends User {
 
     @Getter
