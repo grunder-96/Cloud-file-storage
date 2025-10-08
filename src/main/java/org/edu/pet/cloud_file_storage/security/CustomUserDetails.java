@@ -1,39 +1,89 @@
 package org.edu.pet.cloud_file_storage.security;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.util.Assert;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CustomUserDetails extends User {
+@Getter
+public class CustomUserDetails implements UserDetails, CredentialsContainer {
 
-    @Getter
-    private final Long id;
+    private final long id;
+    private final User user;
 
-    public CustomUserDetails(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        super(username, password, authorities);
-        Assert.isTrue(id != null,"Cannot pass null or empty values to constructor");
+    public CustomUserDetails(long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
+
         this.id = id;
+        user = new User(username, password, authorities);
+    }
+
+    public CustomUserDetails(long id, String username, String password, boolean enabled,
+                             boolean accountNonExpired, boolean credentialsNonExpired,
+                             boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
+
+        this.id = id;
+        user = new User(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
     }
 
     @JsonCreator
-    public CustomUserDetails(@JsonProperty("id") Long id,
-                             @JsonProperty("username") String username,
-                             @JsonProperty("password") String password,
-                             @JsonProperty("enabled") boolean enabled,
-                             @JsonProperty("accountNonExpired") boolean accountNonExpired,
-                             @JsonProperty("credentialsNonExpired") boolean credentialsNonExpired,
-                             @JsonProperty("accountNonLocked") boolean accountNonLocked,
-                             @JsonProperty("authorities") Collection<? extends GrantedAuthority> authorities) {
+    private CustomUserDetails(@JsonProperty("id") long id, @JsonProperty("user") User user) {
 
-        super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
-        Assert.isTrue(id != null,"Cannot pass null or empty values to constructor");
         this.id = id;
+        this.user = user;
+    }
+
+    @Override
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return user.getAuthorities();
+    }
+
+    @Override
+    @JsonIgnore
+    public String getPassword() {
+        return  user.getPassword();
+    }
+
+    @Override
+    @JsonIgnore
+    public String getUsername() {
+        return user.getUsername();
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonExpired() {
+        return user.isAccountNonExpired();
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonLocked() {
+        return user.isAccountNonLocked();
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isCredentialsNonExpired() {
+        return user.isCredentialsNonExpired();
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isEnabled() {
+        return user.isEnabled();
+    }
+
+    @Override
+    public void eraseCredentials() {
+        user.eraseCredentials();
     }
 }
