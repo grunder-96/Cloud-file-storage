@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -66,12 +65,6 @@ public class SecurityConfig {
 
                 .exceptionHandling(customizer ->
                         customizer.authenticationEntryPoint(customAuthEntryPoint)
-                )
-
-                .sessionManagement(customizer -> customizer
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .sessionFixation().migrateSession()
-                        .sessionAuthenticationStrategy(sessionAuthenticationStrategy())
                 )
 
                 .authorizeHttpRequests(authorize -> authorize
