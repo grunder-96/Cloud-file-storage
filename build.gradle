@@ -24,6 +24,13 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	minioVersion = '8.6.0'
+	modelMapperVersion = '3.2.6'
+	testContainersBomVersion = '2.0.5'
+	redisTestContainersVersion = '2.2.4'
+}
+
 dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -35,16 +42,17 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.session:spring-session-data-redis'
 
-	implementation 'io.minio:minio:8.6.0'
+	implementation "io.minio:minio:${minioVersion}"
 
 	implementation 'org.liquibase:liquibase-core'
-	implementation 'org.modelmapper:modelmapper:3.2.3'
+	implementation "org.modelmapper:modelmapper:${modelMapperVersion}"
 	runtimeOnly 'org.postgresql:postgresql'
 
-	testImplementation(platform("org.testcontainers:testcontainers-bom:2.0.5"))
+	testImplementation(platform("org.testcontainers:testcontainers-bom:${testContainersBomVersion}"))
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
 	testImplementation 'org.testcontainers:testcontainers-postgresql'
+	testImplementation "com.redis:testcontainers-redis:${redisTestContainersVersion}"
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
