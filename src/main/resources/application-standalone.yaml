@@ -27,3 +27,10 @@ logging:
   level:
     org.springframework.session.*: DEBUG
     org.springframework.security.*: DEBUG
+
+minio:
+  bucket: ${MINIO_DEFAULT_BUCKET_NAME:user-files}
+  user-folder-template: ${MINIO_USER_DIRECTORY_TEMPLATE:user-%d-files/}
+  url: ${MINIO_URL:http://localhost:9000/}
+  access-key: ${MINIO_ACCESS_KEY:minio-user}
+  secret-key: ${MINIO_SECRET_KEY:miniousrpass}
