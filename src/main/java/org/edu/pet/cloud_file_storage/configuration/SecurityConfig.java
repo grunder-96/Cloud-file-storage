@@ -62,7 +62,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-
+                .securityContext(customizer ->
+                        customizer.securityContextRepository(securityContextRepository())
+                )
+                
                 .exceptionHandling(customizer ->
                         customizer.authenticationEntryPoint(customAuthEntryPoint)
                 )
