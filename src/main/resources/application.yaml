@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: cloud-file-storage
+
+  servlet:
+    multipart:
+      max-file-size: 3MB
+      max-request-size: 15MB
+
+  jpa:
+    open-in-view: false
+
+  session:
+    timeout: 7d
+
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true

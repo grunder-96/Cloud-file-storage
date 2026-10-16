@@ -1,10 +1,9 @@
 package org.edu.pet.cloud_file_storage.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.edu.pet.cloud_file_storage.config.MinioTestConfig;
-import org.edu.pet.cloud_file_storage.dto.SignInRequestDto;
-import org.edu.pet.cloud_file_storage.dto.SignUpRequestDto;
+import org.edu.pet.cloud_file_storage.dto.auth.SignInRequestDto;
+import org.edu.pet.cloud_file_storage.dto.auth.SignUpRequestDto;
 import org.edu.pet.cloud_file_storage.repository.UserRepository;
 import org.edu.pet.cloud_file_storage.service.UserService;
 import org.edu.pet.cloud_file_storage.util.SessionIdUtil;
@@ -14,8 +13,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -23,11 +23,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -52,13 +53,15 @@ public class AuthControllerIT extends AbstractAuthIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
     @Autowired
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    ApplicationContext applicationContext;
 
     private static final String REG_URL = "/api/auth/sign-up";
     private static final String LOGIN_URL = "/api/auth/sign-in";
@@ -81,18 +84,18 @@ public class AuthControllerIT extends AbstractAuthIntegrationTest {
             //when
             MvcResult mvcResult = mockMvc.perform(post(REG_URL)
                             .contentType(APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validRegData)))
+                            .content(jsonMapper.writeValueAsString(validRegData)))
                     .andDo(print())
             //then
                     .andExpectAll(
                             status().isCreated(),
                             content().contentTypeCompatibleWith(APPLICATION_JSON),
-                            jsonPath("$.username", is(validRegData.getUsername())),
+                            jsonPath("$.username", is(validRegData.username())),
                             cookie().exists(SessionIdUtil.SESSION_COOKIE_NAME)
                     )
                     .andReturn();
 
-            assertThat(userRepository.findByUsernameIgnoreCase(validRegData.getUsername())).isPresent();
+            assertThat(userRepository.findByUsernameIgnoreCase(validRegData.username())).isPresent();
 
             String cookieSessionId = SessionIdUtil.getSessionIdValue(mvcResult);
             assertTrue(stringRedisTemplate.hasKey(SessionIdUtil.convertToRedisKey(cookieSessionId)));
@@ -105,7 +108,7 @@ public class AuthControllerIT extends AbstractAuthIntegrationTest {
             //when
             mockMvc.perform(post(REG_URL)
                             .contentType(APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(regData)))
+                            .content(jsonMapper.writeValueAsString(regData)))
                     .andDo(print())
             //then
                     .andExpectAll(
@@ -122,13 +125,13 @@ public class AuthControllerIT extends AbstractAuthIntegrationTest {
             //when
             mockMvc.perform(post(REG_URL)
                             .contentType(APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(regData)))
+                            .content(jsonMapper.writeValueAsString(regData)))
                     .andDo(print())
             //then
                     .andExpectAll(
                             status().isBadRequest(),
                             content().contentTypeCompatibleWith(APPLICATION_JSON),
-                            jsonPath("$.message.username", contains("must start with a letter and end with a letter or digit, contain only a-zA-Z0-9_-"))
+                            jsonPath("$.message", containsString("must start with a letter and end with a letter or digit, contain only a-zA-Z0-9_-"))
                     );
         }
     }
@@ -144,7 +147,7 @@ public class AuthControllerIT extends AbstractAuthIntegrationTest {
             //when
             mockMvc.perform(post(LOGIN_URL)
                             .contentType(APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(user)))
+                            .content(jsonMapper.writeValueAsString(user)))
                     .andDo(print())
             //then
                     .andExpectAll(
@@ -161,7 +164,7 @@ public class AuthControllerIT extends AbstractAuthIntegrationTest {
 
             MvcResult firstLoginResult = mockMvc.perform(post(LOGIN_URL)
                             .contentType(APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(alreadyRegisteredUser)))
+                            .content(jsonMapper.writeValueAsString(alreadyRegisteredUser)))
                     .andDo(print())
                     .andReturn();
 
@@ -171,12 +174,12 @@ public class AuthControllerIT extends AbstractAuthIntegrationTest {
             //when
             MvcResult secondLoginResult = mockMvc.perform(post(LOGIN_URL)
                             .contentType(APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(alreadyRegisteredUser))
+                            .content(jsonMapper.writeValueAsString(alreadyRegisteredUser))
                             .cookie(new Cookie(SessionIdUtil.SESSION_COOKIE_NAME, firstLoginSessionId)))
                     .andDo(print())
             //then
-                    .andExpect(content().json(objectMapper.writeValueAsString(
-                            Map.of("username", alreadyRegisteredUser.getUsername()))))
+                    .andExpect(content().json(jsonMapper.writeValueAsString(
+                            Map.of("username", alreadyRegisteredUser.username()))))
                     .andReturn();
 
             String secondLoginSessionId = SessionIdUtil.getSessionIdValue(secondLoginResult);
@@ -212,7 +215,7 @@ public class AuthControllerIT extends AbstractAuthIntegrationTest {
 
             MvcResult loginResult = mockMvc.perform(post(LOGIN_URL)
                             .contentType(APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(user)))
+                            .content(jsonMapper.writeValueAsString(user)))
                     .andDo(print())
                     .andReturn();
 

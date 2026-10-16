@@ -1,4 +1,10 @@
 package org.edu.pet.cloud_file_storage.dto;
 
-public record ErrorResponseDto<T>(T message) {
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Standard error response")
+public record ErrorResponseDto<T>(
+
+        @Schema(description = "Human-readable error message")
+        T message) {
 }

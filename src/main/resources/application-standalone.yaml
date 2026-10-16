@@ -1,36 +1,20 @@
 spring:
   config:
-    import: optional:file:.env[.properties]
-
-  application:
-    name: cloud-file-storage
+    import: file:.env[.properties]
 
   datasource:
-    url: jdbc:postgresql://localhost:${DB_PORT:5432}/${DB_NAME:cloud}
-    username: ${DB_USERNAME:admin}
-    password: ${DB_PASSWORD:"Qwerty-12345"}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   data:
     redis:
-      password: ${REDIS_PASSWORD:redis_simple_pass}
-
-  session:
-    timeout: 7d
-
-server:
-  servlet:
-    session:
-      cookie:
-        max-age: 30d
-
-logging:
-  level:
-    org.springframework.session.*: DEBUG
-    org.springframework.security.*: DEBUG
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
 
 minio:
-  bucket: ${MINIO_DEFAULT_BUCKET_NAME:user-files}
-  user-folder-template: ${MINIO_USER_DIRECTORY_TEMPLATE:user-%d-files/}
-  url: ${MINIO_URL:http://localhost:9000/}
-  access-key: ${MINIO_ACCESS_KEY:minio-user}
-  secret-key: ${MINIO_SECRET_KEY:miniousrpass}
+  bucket: user-files
+  url: ${MINIO_URL}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}

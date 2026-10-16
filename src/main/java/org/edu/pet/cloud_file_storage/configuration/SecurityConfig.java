@@ -18,6 +18,8 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.CorsUtils;
 
 import java.util.List;
 
@@ -28,6 +30,8 @@ public class SecurityConfig {
 
     private final AuthenticationEntryPoint customAuthEntryPoint;
     private final LogoutSuccessHandler logoutSuccessHandler;
+
+    private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -57,8 +61,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         return http
-
-                .cors(AbstractHttpConfigurer::disable)
+                .cors(customizer -> customizer.configurationSource(corsConfigurationSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -71,16 +74,14 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers(
-                                "/",
-                                "/index.html",
-                                "/config.js",
-                                "/assets/**",
-                                "/login",
-                                "/registration",
-                                "/files/**",
-                                "/api/auth/sign-up",
-                                "/api/auth/sign-in"
+                            "/api/auth/sign-up",
+                            "/api/auth/sign-in",
+                            "/swagger-ui.html",
+                            "/swagger-ui/**",
+                            "/v3/api-docs/**",
+                            "/actuator/health"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

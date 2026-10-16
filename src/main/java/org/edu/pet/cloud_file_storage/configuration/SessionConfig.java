@@ -1,35 +1,37 @@
 package org.edu.pet.cloud_file_storage.configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.edu.pet.cloud_file_storage.security.CustomUserDetails;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.security.jackson2.SecurityJackson2Modules;
+import org.springframework.security.jackson.SecurityJacksonModules;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 
 @Configuration
 public class SessionConfig implements BeanClassLoaderAware {
 
-    private ClassLoader classLoader;
+    private ClassLoader loader;
 
     @Bean
     public RedisSerializer<Object> springSessionDefaultRedisSerializer() {
-
-        return new GenericJackson2JsonRedisSerializer(objectMapper());
+        return new JacksonJsonRedisSerializer<>(objectMapper(), Object.class);
     }
 
-    private ObjectMapper objectMapper() {
+    private JsonMapper objectMapper() {
 
-        ObjectMapper mapper = new ObjectMapper();
+        BasicPolymorphicTypeValidator.Builder builder = BasicPolymorphicTypeValidator.builder()
+                .allowIfSubType(CustomUserDetails.class);
 
-        mapper.registerModules(SecurityJackson2Modules.getModules(this.classLoader));
-
-        return mapper;
+        return JsonMapper.builder()
+                .addModules(SecurityJacksonModules.getModules(this.loader, builder))
+                .build();
     }
 
     @Override
     public void setBeanClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
+        this.loader = classLoader;
     }
 }

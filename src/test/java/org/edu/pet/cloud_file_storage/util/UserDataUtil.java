@@ -3,8 +3,8 @@ package org.edu.pet.cloud_file_storage.util;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.edu.pet.cloud_file_storage.dto.SignInRequestDto;
-import org.edu.pet.cloud_file_storage.dto.SignUpRequestDto;
+import org.edu.pet.cloud_file_storage.dto.auth.SignInRequestDto;
+import org.edu.pet.cloud_file_storage.dto.auth.SignUpRequestDto;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UserDataUtil {
