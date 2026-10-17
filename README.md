@@ -3,7 +3,7 @@
 Учебное приложение для хранения файлов: Spring Boot + React + MinIO + Postgres + Redis.
 
 ## Локальный запуск
-1. Создать `.env.standalone` на основе `.env.standalone.example`.
+1. При необходимости изменить значения переменных в `.env.standalone`.
 
 2. Поднять инфраструктуру (Postgres, Redis, MinIO, Nginx + static):
    ```bash
