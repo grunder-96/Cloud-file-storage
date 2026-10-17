@@ -1,0 +1,7 @@
+your-domain.com {
+    reverse_proxy frontend:80
+}
+
+minio.your-domain.com {
+    reverse_proxy minio:9001
+}

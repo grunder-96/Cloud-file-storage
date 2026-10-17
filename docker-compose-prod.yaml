@@ -4,8 +4,24 @@ volumes:
   postgres_data:
   redis_data:
   minio_data:
+  caddy_data:
+  caddy_config:
 
 services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - minio
   app:
     build:
       context: ./
@@ -30,8 +46,6 @@ services:
   frontend:
     build:
       context: ./frontend
-    ports:
-      - "80:80"
     volumes:
       - ./frontend/public/config-prod.js:/usr/share/nginx/html/config.js:ro
       - ./frontend/nginx-prod.conf:/etc/nginx/nginx.conf:ro
@@ -42,11 +56,10 @@ services:
   minio:
     image: grunder96/minio:latest
     command: server /data --console-address ":9001"
-    ports:
-      - "127.0.0.1:${MINIO_CONSOLE_PORT}:9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+      MINIO_BROWSER_REDIRECT_URL: ${MINIO_BROWSER_REDIRECT_URL}
     volumes:
       - minio_data:/data
     healthcheck:
