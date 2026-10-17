@@ -40,7 +40,7 @@ services:
         condition: service_healthy
 
   minio:
-    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772
+    image: grunder96/minio:latest
     command: server /data --console-address ":9001"
     ports:
       - "127.0.0.1:${MINIO_CONSOLE_PORT}:9001"
